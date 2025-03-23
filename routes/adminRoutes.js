@@ -90,6 +90,7 @@ router.route("/removeOutletPartner/:id").delete(deleteOutletPartner) //authenica
 router.route("/updateOutletPartner/:userId").patch(upload.single("img"), updateOutletPartner);
 //newly added
 router.route("/addDelPartner-outlet/:outletId").patch(addDeliveryPartnerToOutlet);
+
 // Update outlet details with optional image upload
 router.route("/outlet/update/:outletId")
   .patch(

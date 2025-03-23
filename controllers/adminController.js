@@ -62,7 +62,7 @@ catch (err){
 }
 }
 
-// Add this to your adminController.js file
+
 
 // Updates an existing outlet
 export const updateOutlet = async (req, res) => {

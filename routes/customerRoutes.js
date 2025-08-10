@@ -4,6 +4,7 @@ import {
     newUser ,
     getCustomerById,
     updateUser,
+    updateUserAddress,
     // requestOTP,
     verifyPassword,
 } from "../controllers/customerController.js"
@@ -15,6 +16,7 @@ const mult = multer();
 router.route("/user").post(newUser) //authenicateUser,
 router.route("/user/:phone").patch(mult.any(),updateUser) //authenicateUser,
 router.route("/user/:customerId").get( getCustomerById)
+router.route("/user/:phone/addresses").patch(updateUserAddress);
 
 router.route('/verifypassword',verifyPassword)
 // router.route('/request-otp').post(requestOTP)

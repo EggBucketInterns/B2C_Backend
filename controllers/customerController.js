@@ -151,6 +151,69 @@ const updateUser = async (req, res) => {
   }
 };
 
+const updateUserAddress = async (req, res) => {
+  try {
+    // 1. Get the phone number from the URL parameters
+    const { phone } = req.params;
+
+    // 2. Get the index and the new fullAddress object from the request body
+    const { index, fullAddress } = req.body;
+
+    // 3. --- VALIDATION ---
+    // Check if the required data is present in the request
+    if (index === undefined || !fullAddress) {
+      return res.status(400).json({ message: "Request body must contain 'index' and 'fullAddress'" });
+    }
+    // Check if the index is a valid number
+    if (typeof index !== 'number' || index < 0) {
+      return res.status(400).json({ message: "Invalid index provided. Must be a non-negative number." });
+    }
+
+    // 4. --- FIRESTORE LOGIC ---
+    const db = getFirestore();
+    const userDocRef = db.collection(mainCollection).doc(phone);
+    const userDoc = await userDocRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userData = userDoc.data();
+    let existingAddresses = userData.addresses || [];
+
+    // 5. --- MORE VALIDATION ---
+    // Check if the index is within the bounds of the addresses array
+    if (index >= existingAddresses.length) {
+      return res.status(400).json({ message: "Invalid index: Index is out of bounds for the addresses array." });
+    }
+
+    // 6. --- THE CORE UPDATE LOGIC ---
+    // Get the original address object to preserve its other properties (like coordinates)
+    const originalAddressObject = existingAddresses[index];
+
+    // Create the new, updated address object.
+    // This keeps all original fields (like 'coordinates') and only overwrites 'fullAddress'.
+    const updatedAddressObject = {
+        ...originalAddressObject,
+        fullAddress: fullAddress
+    };
+
+    // Replace the old address object with the new one in the array
+    existingAddresses[index] = updatedAddressObject;
+
+    // 7. --- SAVE TO FIRESTORE ---
+    // Update the document with the modified addresses array
+    await userDocRef.update({ addresses: existingAddresses });
+
+    // 8. --- SEND SUCCESS RESPONSE ---
+    res.status(200).json({ message: "Address updated successfully" });
+
+  } catch (err) {
+    // Generic error handler
+    res.status(500).json({ message: "Failed to update address", error: err.message });
+    console.error(err);
+  }
+};
 
 
 
@@ -220,6 +283,7 @@ export {
   newUser,
   getCustomerById,
   updateUser,
+  updateUserAddress,
   // requestOTP,
   // verifyOTP,
   verifyPassword,
